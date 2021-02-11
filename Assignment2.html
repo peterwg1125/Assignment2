@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no, initial-scale=1.0"/>
+    <title></title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/components/main.css"/>
+    <script src="https://unpkg.com/vue"></script>
+</head>
+<body>
+
+<div id="app">
+    <h2> {{ pageName }} </h2>
+    <ul>
+        <li v-for="(movie, index) in movies" :key="movie.id">
+            <span> {{ movie.title }} </span>
+            <span> | Director: {{ fullName(movie) }} </span>
+            <span> | Released: {{movie.year}}</span>
+            <span> | Average Rating: {{averageRating(movie)}} / 5</span>
+            <span> | Add Rating (1 through 5): </span>
+            <input v-on:keyup="showError" type="text" id="list-input" v-model="newItem">
+            <input type="submit" id="list-submit" v-on:click="addRating(movie)">
+            <span v-if="showError" id="error" style="color: #ff0000;">Please Enter Text</span>
+        </li>
+    </ul>
+    <h2>Add a Movie: </h2>
+
+    <form id="addMovie-form" @submit.prevent="addMovie">
+        <div class="form-group">
+            <label for="dirFirstName">Director First Name:</label>
+            <input class="form-control" id="dirFirstName">
+
+            <label for="dirLastName">Director Last Name:</label>
+            <input class="form-control" id="dirLastName">
+
+            <label for="title">Title:</label>
+            <input class="form-control" id="title">
+
+            <label for="year">Year:</label>
+            <input type="number" class="form-control" id="year">
+        </div>
+        <div class="col-md-6">
+            <button class="btn btn-primary">Add Movie</button>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    const app = new Vue({
+        el: '#app',
+        data: {
+            pageName: "Movie List",
+            movies: [
+                {"id": 0, "dirFirstName": "Quentin", "dirLastName": "Tarantino", "title": "Django Unchained", "year": 2012},
+                {"id": 1, "dirFirstName": "Guillermo", "dirLastName": "Del Toro", "title": "Pacific Rim", "year": 2013},
+            ],
+            ratings: [
+                {"id":0, "rating": 4},
+                {"id":1, "rating": 2},
+                {"id":0, "rating": 2},
+            ],
+            showError: false
+        },
+        computed: {
+            totalMovies: function () {
+                return this.movies.reduce((sum, movie) => {
+                    return sum;
+                }, 0);
+            }
+        },
+        methods: {
+            fullName: function (movie) {
+                return [movie.dirFirstName, movie.dirLastName].join(' ');
+            },
+            addRating: function (movie) {
+                this.showError = (this.newItem == "");
+                if (!this.showError && this.newItem.valueOf() >= 1 && this.newItem.valueOf() <= 5) {
+                    app.ratings.push({
+                        id: movie.id,
+                        rating: this.newItem
+                    });
+                    this.newItem = '';
+                }
+            },
+            averageRating: function(movie) {
+                var average;
+                var length = this.ratings.length;
+                var occurances = 0;
+                var total = 0;
+                for (var i = 0; i < length; i++) {
+                    if (movie.id === this.ratings[i].id) {
+                        total = parseInt(total) + parseInt(this.ratings[i].rating);
+                        occurances = occurances + 1;
+                    }
+                }
+                average = total / occurances;
+                return average;
+            }
+            ,
+            addMovie: function() {
+                console.log("addMovie()");
+
+                const addMovieForm = document.getElementById('addMovie-form');
+                const firstNameInput  = addMovieForm.querySelector('input[id=dirFirstName]');
+                const lastNameInput = addMovieForm.querySelector('input[id=dirLastName]');
+                const titleInput = addMovieForm.querySelector('input[id=title]');
+                const yearInput = addMovieForm.querySelector('input[id=year]');
+
+                this.movies.push({"id": this.movies.length, "dirFirstName": firstNameInput.value, "dirLastName": lastNameInput.value, "title": titleInput.value, "year": yearInput.value});
+
+
+            },
+            deleteMovie: function(index) {
+                console.log("deleteMovie() was called ", index);
+                this.movies.splice(index, 1);
+            }
+        },
+        created: function() {
+            console.log("created event happened");
+        }
+    });
+</script>
+
+
+</body>
+</html>
